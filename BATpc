@@ -1,0 +1,55 @@
+@echo off
+setlocal enabledelayedexpansion
+
+REM Создаем файл для вывода информации
+set "OUTPUT=PC_Info_Report.txt"
+echo Сбор информации о системе... > "%OUTPUT%"
+echo =============================== >> "%OUTPUT%"
+
+REM Имя компьютера и пользователя
+echo Имя компьютера: %COMPUTERNAME% >> "%OUTPUT%"
+echo Имя пользователя: %USERNAME% >> "%OUTPUT%"
+
+REM ОС и версия
+echo. >> "%OUTPUT%"
+echo --- ОС и версия --- >> "%OUTPUT%"
+ver >> "%OUTPUT%"
+systeminfo | findstr /B /C:"OS Name" /C:"OS Version" >> "%OUTPUT%"
+
+REM Процессор
+echo. >> "%OUTPUT%"
+echo --- Процессор --- >> "%OUTPUT%"
+wmic cpu get Name,NumberOfCores,NumberOfLogicalProcessors >> "%OUTPUT%"
+
+REM Оперативная память
+echo. >> "%OUTPUT%"
+echo --- Оперативная память --- >> "%OUTPUT%"
+systeminfo | findstr /C:"Total Physical Memory" >> "%OUTPUT%"
+
+REM Видеокарта
+echo. >> "%OUTPUT%"
+echo --- Видеокарта --- >> "%OUTPUT%"
+wmic path win32_VideoController get name >> "%OUTPUT%"
+
+REM Сетевые адаптеры
+echo. >> "%OUTPUT%"
+echo --- Сетевые адаптеры --- >> "%OUTPUT%"
+wmic nic where "NetEnabled=true" get Name >> "%OUTPUT%"
+
+REM Жесткие диски
+echo. >> "%OUTPUT%"
+echo --- Диски --- >> "%OUTPUT%"
+wmic logicaldisk get Name,FileSystem,Size,FreeSpace >> "%OUTPUT%"
+
+REM DirectX (сохранение полного отчета)
+echo. >> "%OUTPUT%"
+echo --- DirectX Диагностика --- >> "%OUTPUT%"
+dxdiag /t dxdiag_output.txt
+type dxdiag_output.txt >> "%OUTPUT%"
+del dxdiag_output.txt
+
+echo. >> "%OUTPUT%"
+echo === Сбор данных завершён === >> "%OUTPUT%"
+
+REM Открыть файл после выполнения
+start notepad "%OUTPUT%"
